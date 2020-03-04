@@ -16,7 +16,7 @@ class Authentication:
         self.username=config.get('Av_central',"Client ID")
         self.password = config.get('Av_central', "Secret")
         self.url=config.get('Av_central',"Aut_url")
-    def encode_credentials(self):
+    def encode_credentials(self): # encoging the Credentials
         cred = f'{self.username}:{self.password}'.encode()
         convert_base = base64.b64encode(cred).decode()
         return f'Basic {convert_base}'
@@ -32,15 +32,28 @@ class Authentication:
 
 
 class Fetching_data():
-    def fetching_alarams(self, url, token, days):
-        headers = {'Authorization': f'Bearer {token}'}
+    def __init__(self):
+        config = RawConfigParser()
+        config.read(os.getcwd() + '\\config')
+        self.days=config.get('Av_central',"days")
+        self.url=config.get('Av_central',"al_url")
+        self.graphpath=config.get('Av_central',"graphpath")
+        self.csvpath=config.get('Av_central',"csvpath")
+        self.ppt_path=config.get('Av_central',"ppt_path")
+    
+    def fetching_alarams(self,  token):
+        headers = {'Authorization': f'Bearer {token}'} #Parsing the token in the headers 
         page_num=1
-        dummy=100
+        dummy=100 
+        # initially take a dummy value as100 
+#Page number as 1  
+
         csv_list,customer_list,eventname_list = [],[],[]
+    #If u need additional inform motion create a list for that 2 present we are using a to clients in past 24 hr and event 
         while True:
 
 
-            data = {"page": page_num, "size":100, "find": {"alarm.suppressed": ["false"]},"sort": {"alarm.timestamp_occured": "desc"},"range": {"alarm.timestamp_occured": {"gte": f"now-{days}d", "lte": "now", "timeZone": "-0500"}}}
+            data = {"page": page_num, "size":100, "find": {"alarm.suppressed": ["false"]},"sort": {"alarm.timestamp_occured": "desc"},"range": {"alarm.timestamp_occured": {"gte": f"now-{self.days}d", "lte": "now", "timeZone": "-0500"}}}
             response = requests.post(url=url, data=json.dumps(data), headers=headers)
             if response.status_code==200:
                 data=response.json()
@@ -63,10 +76,10 @@ class Fetching_data():
                 page_num += 1
 
 
-                if dummy > int(data['total']): break
+                if dummy > int(data['total']): break #the look will break if the  total alarm count is less than dummy
 
             else: print(f'Not Able to Connect | Status Code : {response.status_code} | Reason : {response.reason}')
-            dummy += 100
+            dummy += 100 # this is because page size is 100
             time.sleep(0.5)
         fields = ["Customer Name", "Event Type", "Event Name", "source Ip", "destination Ip", "Sub user Name",
                   "Target user Name", "Raw log"]
@@ -78,6 +91,12 @@ class Fetching_data():
 
         return csv_list,fields,graph_data
     def featching_vulnerability(self,url,token,days):
+        def __init__(self):
+        config = RawConfigParser()
+        config.read(os.getcwd() + '\\config')
+        self.days=config.get('Av_central',"days")
+        self.url=config.get('Av_central',"al_url")
+      
         headers = {'Authorization': f'Bearer {token}'}
         page_num = 1
         dummy = 100
@@ -115,16 +134,25 @@ class Fetching_data():
 
 
 class Result_output():
-    def csvfile(self,filepath,response,fields):
+    def __init__(self):
+        config = RawConfigParser()
+        config.read(os.getcwd() + '\\config')
+        self.days=config.get('Av_central',"days")
+        self.url=config.get('Av_central',"al_url")
+        self.graphpath=config.get('Av_central',"graphpath")
+        self.csvpath=config.get('Av_central',"csvpath")
+        self.ppt_path=config.get('Av_central',"ppt_path")
+        self.exelpath=config.get('Av_central',"exelpath")
+    def csvfile(self,response,fields):
 
-        with open(filepath,"w",newline="",encoding="utf-8")as new_csv:
+        with open(self.csvpath,"w",newline="",encoding="utf-8")as new_csv:
 
             writer = csv.DictWriter(new_csv, fieldnames=fields)
             writer.writeheader()
             writer.writerows(response)
-    def excelfile(self,path_1,path_2):
-        df=pd.read_csv(path_1)
-        df.to_excel(path_2,index=False)
+    def excelfile(self):
+        df=pd.read_csv(self.csvpath)
+        df.to_excel(exelpath,index=False)
 class Graph():
     def bar_graph(self,x,y,title,xname,yname,path):
         plt.bar(x,y,align = "center",alpha=0.5,color = ["r","b","g","y"],linewidth=0,width=0.5)
