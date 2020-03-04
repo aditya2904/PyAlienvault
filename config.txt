@@ -2,9 +2,12 @@
 
 client ID="********"
 Secret="*******"
-Aut_url="******"
+Aut_url="******" #Authentication url
+al_url="*******" # alaram URl
+vul_url="*******" # vulnerability url
 
 graphpath="******"
 csvpath="******"
 exelpath="******"
 ppt_path="******"
+days="***" # data to fetch for number of days 
