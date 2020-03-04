@@ -1,0 +1,10 @@
+[Av_central]
+
+client ID="********"
+Secret="*******"
+Aut_url="******"
+
+graphpath="******"
+csvpath="******"
+exelpath="******"
+ppt_path="******"
