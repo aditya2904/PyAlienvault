@@ -9,18 +9,25 @@ from pptx.util import Inches
 
 
 
-class Authendication():
-    def encode_credentials(self,username, password):
-        cred = f'{username}:{password}'.encode()
+class Authentication:
+    def __init__(self):
+        config = RawConfigParser()
+        config.read(os.getcwd() + '\\config')
+        self.username=config.get('Av_central',"Client ID")
+        self.password = config.get('Av_central', "Secret")
+        self.url=config.get('Av_central',"Aut_url")
+    def encode_credentials(self):
+        cred = f'{self.username}:{self.password}'.encode()
         convert_base = base64.b64encode(cred).decode()
         return f'Basic {convert_base}'
 
-    def get_authenticate(self,url, username, password):
-        headers = {'Authorization': self.encode_credentials(username, password), 'accept': 'application/json'}
-        login_res = requests.post(url, headers=headers)
+    def get_authenticate(self):
+        headers = {'Authorization': self.encode_credentials(), 'accept': 'application/json',"grant_type":'client_credentials'}
+        login_res = requests.post(self.url, headers=headers)
         if login_res.status_code == 200:
             return login_res.json()['access_token']
-        else: print(f'Not Able to Connect | Status Code : {login_res.status_code} | Reason : {login_res.reason}')
+        else:
+            print(f'Not Able to Connect | Status Code : {login_res.status_code} | Reason : {login_res.reason}')
 
 
 
